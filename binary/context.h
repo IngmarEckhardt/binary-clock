@@ -1,10 +1,8 @@
 #ifndef CONTEXT_H_
 #define CONTEXT_H_
-#define F_CPU 1000000UL
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 #include <avr/sleep.h>
 
 //define PINs
@@ -56,6 +54,7 @@ typedef struct {
 	uint8_t buttonPressed;
 	uint8_t state;
 	
+	volatile uint16_t quarterMs;
 	volatile uint8_t seconds;
 	volatile uint8_t minutes;
 	volatile uint8_t hours;
@@ -76,6 +75,7 @@ void showMinutesOrSeconds(uint8_t value);
 void blinkWithLed(ClockState *clock, uint8_t portMask);
 void showHours(uint8_t value);
 void handleUndimmedState(ClockState *clock);
+void handleDimmedState(ClockState *clock);
 
 void handleSetTimeMode(ClockState *clock, ButtonStates *buttonStates);
 

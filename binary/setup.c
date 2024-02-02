@@ -22,6 +22,7 @@ void setupClock(ClockState *clock) {
 	clock->hours = 13;
 	clock->minutes = 50;
 	clock->seconds = 50;
+	clock->quarterMs = 0;
 	clock->blinkCounter = 0;
 	clock->awokeTimeCounterSeconds = 0;
 }
@@ -56,8 +57,8 @@ void setupMikroController() {
 	//turn off Analog Comparator
 	ACSR |= (1 << ACD);
 
-	//turning off other modules except timer 2
-	PRR |= (1 <<  PRTWI) |  (1 <<   PRTIM0) | (1 <<  PRSPI)| (1 << PRUSART0)| (1 << PRADC);
+	//turning off other modules except timer 0 and 2
+	PRR |= (1 <<  PRTWI) |  (1 <<   PRTIM1) | (1 <<  PRSPI)| (1 << PRUSART0)| (1 << PRADC);
 	
 	/*
 	//turn off digital input buffers for analog channels

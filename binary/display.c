@@ -1,6 +1,6 @@
 #include "context.h"
 
-//0,25% Output
+
 const int LED_ON_DELAY_DIMMED_US = 50;
 const int LED_OFF_DELAY_DIMMED_US = 20000;
 //50% Output
@@ -61,39 +61,37 @@ void turnOffLed(ClockState *clock, uint8_t portMask) {
 	clock -> ledsOn = FALSE;
 }
 void handleDimmedState(ClockState *clock) {
-
-	if (clock -> ledsOn) {
+	
+	//1% Output
+	if (clock -> ledsOn && clock->quarterMs%100) {
 		turnOffLed(clock, MINUTES_LED | HOURS_LED);
-		_delay_us(LED_OFF_DELAY_DIMMED_US);
-		
-	}
-	else {
+	} else if (!(clock->quarterMs%100) && !clock->ledsOn) {
 		displayTime(clock, MINUTES_LED | HOURS_LED);
-		_delay_us(LED_ON_DELAY_DIMMED_US);
 	}
 }
 
 void handleUndimmedState(ClockState *clock) {
-	if (clock -> ledsOn) {
-		turnOffLed(clock, MINUTES_LED | HOURS_LED);
-		_delay_ms(LED_OFF_DELAY_UNDIMMED_MS);
-
-	}
-	else {
-		displayTime(clock, MINUTES_LED | HOURS_LED);
-		_delay_ms(LED_ON_DELAY_UNDIMMED_MS);
+	//50% Output, still enough for calling it undimmed
+	if (clock->quarterMs%100) {
+		if (clock->ledsOn) {
+			turnOffLed(clock, MINUTES_LED | HOURS_LED );
+		} 
+		else {
+			displayTime(clock, MINUTES_LED | HOURS_LED);
+		}
 	}
 }
 void blinkWithLed(ClockState *clock, uint8_t portMask) {
-	if (clock -> ledsOn) {
+	//quarterMS is set to zero every second from counter2 overflow interrupt
+	//reaction to value 1 if counter0 overflow interrupt already occured
+	if ((clock->quarterMs == 1) && clock -> ledsOn) {
 		turnOffLed(clock, portMask);
-		_delay_ms(LED_BLINK_DELAY_MS);
+		clock -> blinkCounter++;
 	}
-	else {
+	else if((clock->quarterMs == 1) && !(clock -> ledsOn)) {
 		showMinutesOrSeconds(0xFF);
 		showHours(0xFF);
 		displayTime(clock, portMask);
-		_delay_ms(LED_BLINK_DELAY_MS);
+		clock -> blinkCounter++;
 	}
-	clock -> blinkCounter++;
 }

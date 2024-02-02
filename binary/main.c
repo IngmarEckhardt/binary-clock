@@ -1,11 +1,13 @@
-
 #include "context.h"
 
-
-void goToSleep(ClockState *clock, ButtonStates *buttons);
-void wakeUp();
+//we send the controller to idle until counter0 overflow
+void goToIdle(ClockState *clock, ButtonStates *buttons);
+//we turn off pullups and counter0 with its interrupts
+void goToStandby(ClockState *clock, ButtonStates *buttons);
+//we wake up from standby, turn on pull-ups and prepare Idle-Mode and counter 0 with its interrupts
+void wakeUpFromStandby();
+//every second the time and ports for led are updated from counter2 overflow interrupt
 void incrementTimeAndUpdateLed(ClockState *clock);
-
 
 ClockState watch = {0};
 
@@ -29,7 +31,7 @@ int main(void) {
 				case DIMMED:
 				case DIMMED_SHOW_SECONDS: {
 					
-					handleUndimmedState(&watch);
+					handleDimmedState(&watch);
 					break;
 				}
 				
@@ -62,9 +64,10 @@ int main(void) {
 					break;
 				}
 			}
+			goToIdle(&watch,&buttons);
 		}
 		else {
-			goToSleep(&watch, &buttons);
+			goToStandby(&watch, &buttons);
 		}
 	}
 }
@@ -76,9 +79,9 @@ ISR(TIMER2_OVF_vect){
 		
 		watch.wakeUpFlag = checkWakeUpButtonInterruptFlag();
 		
-		//wake up the AtMega if it wasn't awoke and first Button is pressed and return immediately
+	
 		if (watch.wakeUpFlag) {
-			wakeUp();
+			wakeUpFromStandby();
 		}
 		
 	}
@@ -94,18 +97,33 @@ ISR(TIMER2_OVF_vect){
 	}
 }
 
+ISR(TIMER0_OVF_vect){
+	watch.quarterMs++;
+}
+
+void goToIdle(ClockState *clock, ButtonStates *buttons) {
+		
+		//return if any button is still pressed
+		if(anyButtonPressed(buttons)|| !allButtonAreDebounced(buttons)) {
+			return;
+		};
+		
+		//sleep mode control bits all zero for idle, just enable sleep
+		SMCR = 1;
+		sleep_mode();
+}
 
 
-
-
-
-void goToSleep(ClockState *clock, ButtonStates *buttons) {
+void goToStandby(ClockState *clock, ButtonStates *buttons) {
 	
 	//return if any button is still pressed
 	if(anyButtonPressed(buttons)|| !allButtonAreDebounced(buttons)) {
 		return;
 	};
-	
+	//Overflow-Interrupt for Counter0 off
+	TIMSK0 &= ~(1 << TOIE2);
+	//turn off counter0
+	PRR &= ~(1 <<   PRTIM0);
 	turnOffLed(clock, MINUTES_LED | HOURS_LED);
 	
 	// Disable pull-up resistors for the buttons during sleep
@@ -116,17 +134,26 @@ void goToSleep(ClockState *clock, ButtonStates *buttons) {
 	
 	// delete the flag for the Interrupt as last action
 	EIFR &= ~(1 << INTF0);
-	sleep_enable();
+	//sleep mode with counter2 still active (Extended Standby) and Enable Sleep
+	SMCR |= (1 << SM2) | (1 << SM1) | (1 << SM0) | (1 << SE);
 	sleep_mode();
 }
 
-void wakeUp() {
+void wakeUpFromStandby() {
 	sleep_disable();
 	// Enable pull-up resistors for the buttons
 	PORTD |= (1 << BUTTON2) | (1 << BUTTON3);
+	//pre scaler 256 for counter 0 -> ca 0,25ms with 1Mhz CPU Clock
+	TCCR0B |= (1 << CS22);
+	//Overflow-Interrupt for Counter0 on
+	TIMSK0 |= (1 << TOIE2);
+	//turn on timer
+	PRR |= (1 <<   PRTIM0);
+
 }
 
 void incrementTimeAndUpdateLed(ClockState *clock) {
+	clock -> quarterMs = 0;
 	clock -> seconds++;
 
 	if (clock -> seconds >= SECOND_MINUTES_THRESHOLD) {
