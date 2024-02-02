@@ -19,8 +19,6 @@ extern const int HOURS_THRESHOLD;
 extern const int SECOND_MINUTES_THRESHOLD;
 //auto sleep after 15s
 extern const int AWOKE_TIME_IN_SECONDS;
-//debouncing with 10ms
-extern const int DEBOUNCE_DELAY;
 //doubled value for 3 blinks
 extern const int MAX_BLINK_AMOUNT;
 
@@ -69,16 +67,13 @@ uint8_t allButtonAreDebounced(ButtonStates *buttons);
 uint8_t anyButtonPressed(ButtonStates *buttons);
 void readAllButtons(ClockState *clock, ButtonStates *buttons);
 uint8_t checkWakeUpButtonInterruptFlag() ;
-
 void turnOffLed(ClockState *clock, uint8_t portMask);
 void showMinutesOrSeconds(uint8_t value);
 void blinkWithLed(ClockState *clock, uint8_t portMask);
 void showHours(uint8_t value);
 void handleUndimmedState(ClockState *clock);
 void handleDimmedState(ClockState *clock);
-
 void handleSetTimeMode(ClockState *clock, ButtonStates *buttonStates);
-
 void processUserInput(ClockState *clock, ButtonStates *buttons);
 
 #endif /* CONTEXT_H_ */

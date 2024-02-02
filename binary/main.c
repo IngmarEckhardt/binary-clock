@@ -2,7 +2,7 @@
 
 //we send the controller to idle until counter0 overflow
 void goToIdle(ClockState *clock, ButtonStates *buttons);
-//we turn off pullups and counter0 with its interrupts
+//we turn off pull up resistor and counter0 with its interrupts
 void goToStandby(ClockState *clock, ButtonStates *buttons);
 //we wake up from standby, turn on pull-ups and prepare Idle-Mode and counter 0 with its interrupts
 void wakeUpFromStandby();

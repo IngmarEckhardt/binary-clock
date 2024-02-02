@@ -5,9 +5,6 @@ const int HOURS_THRESHOLD = 24;
 const int SECOND_MINUTES_THRESHOLD = 60;
 //auto sleep after 15s
 const int AWOKE_TIME_IN_SECONDS = 15;
-//debouncing with 10ms
-const int DEBOUNCE_DELAY = 10;
-//5% Output
 //doubled value for 3 blinks
 const int MAX_BLINK_AMOUNT = 6;
 

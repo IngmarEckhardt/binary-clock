@@ -1,15 +1,5 @@
 #include "context.h"
 
-
-const int LED_ON_DELAY_DIMMED_US = 50;
-const int LED_OFF_DELAY_DIMMED_US = 20000;
-//50% Output
-const int LED_ON_DELAY_UNDIMMED_MS = 10;
-const int LED_OFF_DELAY_UNDIMMED_MS = 10;
-
-const int LED_BLINK_DELAY_MS = 1000;
-
-
 //set the ports to the LED according the bit-Values of the parameter
 void showMinutesOrSeconds(uint8_t value) {
 	if ((value >> 0) & 0x01) {PORTD |= (1 << PD1);}
