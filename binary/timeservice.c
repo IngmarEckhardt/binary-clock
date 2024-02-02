@@ -54,6 +54,7 @@ void setTime(ClockState *clock,ButtonStates *buttons, volatile uint8_t *timeValu
 			// Reset button press flag when buttons are released
 			clock -> buttonPressed = FALSE;
 		}
+		handleUndimmedState(&watch);
 	}
 }
 

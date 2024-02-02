@@ -49,7 +49,6 @@ int main(void) {
 					
 					watch.state = NOT_DIMMED_SET_TIME;
 					handleSetTimeMode(&watch, &buttons);
-					handleUndimmedState(&watch);
 					break;
 				}
 				
@@ -60,7 +59,6 @@ int main(void) {
 					
 					watch.state = NOT_DIMMED_SET_TIME_HOURS_MODE;
 					handleSetTimeMode(&watch, &buttons);
-					handleUndimmedState(&watch);
 					break;
 				}
 			}
