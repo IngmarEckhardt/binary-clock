@@ -27,7 +27,7 @@ int main(void) {
 			
 			switch (watch.state) {
 				
-				//intentionally fall through to hand
+				//intentionally fall through
 				case DIMMED:
 				case DIMMED_SHOW_SECONDS: {
 					
