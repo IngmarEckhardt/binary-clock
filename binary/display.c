@@ -39,49 +39,17 @@ void showHours(uint8_t value) {
 	else {PORTB &= ~(1 << PB2);}
 }
 
-void displayTime(ClockState *clock, uint8_t portMask) {
-	clock -> ledsOn = TRUE;
-	
-	if (clock->state == DIMMED_SHOW_SECONDS || clock -> state == NOT_DIMMED_SHOW_SECONDS) {showMinutesOrSeconds(clock->seconds);}
+void displayTime(uint8_t portMask) {
 	DDRC |= (portMask);
 }
 
-void turnOffLed(ClockState *clock, uint8_t portMask) {
+void turnOffLed(uint8_t portMask) {
 	DDRC &= ~(portMask);
-	clock -> ledsOn = FALSE;
 }
-void handleDimmedState(ClockState *clock) {
-	
-	//1% Output
-	if (clock -> ledsOn && clock->quarterMs%100) {
-		turnOffLed(clock, MINUTES_LED | HOURS_LED);
-	} else if (!(clock->quarterMs%100) && !clock->ledsOn) {
-		displayTime(clock, MINUTES_LED | HOURS_LED);
-	}
-}
-
-void handleUndimmedState(ClockState *clock) {
-	//50% Output, still enough for calling it undimmed
-	if (clock->quarterMs%100) {
-		if (clock->ledsOn) {
-			turnOffLed(clock, MINUTES_LED | HOURS_LED );
-		} 
-		else {
-			displayTime(clock, MINUTES_LED | HOURS_LED);
-		}
-	}
-}
-void blinkWithLed(ClockState *clock, uint8_t portMask) {
-	//quarterMS is set to zero every second from counter2 overflow interrupt
-	//reaction to value 1 if counter0 overflow interrupt already occured
-	if ((clock->quarterMs == 1) && clock -> ledsOn) {
-		turnOffLed(clock, portMask);
-		clock -> blinkCounter++;
-	}
-	else if((clock->quarterMs == 1) && !(clock -> ledsOn)) {
-		showMinutesOrSeconds(0xFF);
-		showHours(0xFF);
-		displayTime(clock, portMask);
-		clock -> blinkCounter++;
+void handleDisplay(uint8_t idleCounter) {
+	if (idleCounter) {
+		turnOffLed(MINUTES_LED | HOURS_LED);
+	} else {
+		displayTime(MINUTES_LED | HOURS_LED);
 	}
 }

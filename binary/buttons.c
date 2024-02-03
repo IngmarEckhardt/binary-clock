@@ -1,56 +1,31 @@
 #include "context.h"
 
-uint8_t checkWakeUpButtonInterruptFlag() {
 
-	if (EIFR & (1 << INTF0)) {
-		//reset the flag
-		EIFR &= ~(1 << INTF0);
-		return TRUE;
-	}
-	return FALSE;
+void readButton(ButtonState *button) {
+	button ->button_changeLog = (button->button_changeLog << 1) | !((PIND & (1 << button->pin)) >> button->pin);
 }
 
-void readAllButtons(ClockState *clock, ButtonStates *buttons) {
-	uint8_t intermediateState = !((PIND & (1 << BUTTON1)) >> BUTTON1);
-	if (intermediateState != buttons->button1){
-		buttons ->button1_changed = TCNT2;
-		buttons ->button1 = intermediateState;
-	}
-	intermediateState = !((PIND & (1 << BUTTON2)) >> BUTTON2);
-	if (intermediateState != buttons->button2){
-		buttons ->button2_changed = TCNT2;
-		buttons ->button2 = intermediateState;
-	}
-	intermediateState = !((PIND & (1 << BUTTON3)) >> BUTTON3);
-	if (intermediateState != buttons->button3){
-		buttons ->button3_changed = TCNT2;
-		buttons ->button3 = intermediateState;
+void readAllButtons(ButtonState buttons[], uint8_t numButtons) {
+	for (uint8_t i = 0; i < numButtons; ++i) {
+		readButton(&buttons[i]);
 	}
 }
 
-uint8_t buttonIsDebounced(uint8_t changeTimestamp) {
-	uint8_t result;
-	if (TCNT2 < changeTimestamp) {
-		result = TCNT2 + 256 - changeTimestamp;
-		} else {
-		result = TCNT2 - changeTimestamp;
+uint8_t isPressed(ButtonState *button) {
+	uint8_t bitmask = 0b111;
+	if ((button->button_changeLog&bitmask) == bitmask) {
+		button->button_value = TRUE;
+		} else if ((button->button_changeLog&bitmask) == 0) {
+		button->button_value = FALSE;
 	}
-	if (result>=4){
-		return TRUE;
-		} else {
-		return FALSE;
-	}
+	return button->button_value;
 }
 
-uint8_t allButtonAreDebounced(ButtonStates *buttons) {
-	if (buttonIsDebounced(buttons->button1_changed)&&buttonIsDebounced(buttons->button2_changed)&&buttonIsDebounced(buttons->button3_changed)) {
-		return TRUE;
+uint8_t anyButtonPressed(ButtonState buttons[], uint8_t numButtons) {
+	for (uint8_t i = 0; i < numButtons; ++i) {
+		if (isPressed(&buttons[i])) {
+			return TRUE; // At least one button is pressed
+		}
 	}
-	else {
-		return FALSE;
-	}
-}
-
-uint8_t anyButtonPressed(ButtonStates *buttons) {
-	return (buttons ->button1 || buttons ->button2 || buttons ->button3) ? 0 : 1;
+	return FALSE; // No buttons are pressed
 }

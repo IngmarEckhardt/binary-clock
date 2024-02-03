@@ -19,8 +19,11 @@ extern const int HOURS_THRESHOLD;
 extern const int SECOND_MINUTES_THRESHOLD;
 //auto sleep after 15s
 extern const int AWOKE_TIME_IN_SECONDS;
-//doubled value for 3 blinks
-extern const int MAX_BLINK_AMOUNT;
+
+extern const uint8_t MODE_BITMASK;
+extern const uint8_t SECONDS_MODE_BITMASK;
+extern const uint8_t SET_HOUR_BITMASK;
+extern const uint8_t SET_TIME_BITMASK;
 
 enum ClockStates {
 	NOT_DIMMED = 0b00,
@@ -34,46 +37,43 @@ enum ClockStates {
 	DIMMED_SET_TIME_HOURS_MODE = 0b111,
 	DIMMED_SHOW_SECONDS = 0b1001,
 	DIMMED_SET_TIME_SHOW_SECONDS = 0b1011,
-	DIMMED_SET_TIME_HOURS_MODE_SHOW_SECONDS = 0b1111
+	DIMMED_SET_TIME_HOURS_MODE_SHOW_SECONDS = 0b1111,
+	STANDBY = 0b10000000,
+	BUTTON_PRESSED = 0b01000000
 };
 
 typedef struct {
-	uint8_t button1;
-	uint8_t button1_changed;
-	uint8_t button2;
-	uint8_t button2_changed;
-	uint8_t button3;
-	uint8_t button3_changed;
-} ButtonStates;
+	uint8_t pin;
+	volatile uint8_t button_value;
+	volatile uint8_t button_changeLog;
+} ButtonState;
 
 typedef struct {
-	uint8_t blinkCounter;
-	uint8_t ledsOn;
-	uint8_t buttonPressed;
-	uint8_t state;
+	volatile uint8_t state;
 	
-	volatile uint16_t quarterMs;
+	volatile uint8_t idleCounter;
 	volatile uint8_t seconds;
 	volatile uint8_t minutes;
 	volatile uint8_t hours;
 	volatile uint8_t awokeTimeCounterSeconds;
-	volatile uint8_t wakeUpFlag;
+
 } ClockState;
 
 
 void setupMikroController();
-void setupClock(ClockState *clock);
-uint8_t allButtonAreDebounced(ButtonStates *buttons);
-uint8_t anyButtonPressed(ButtonStates *buttons);
-void readAllButtons(ClockState *clock, ButtonStates *buttons);
-uint8_t checkWakeUpButtonInterruptFlag() ;
-void turnOffLed(ClockState *clock, uint8_t portMask);
+void setupClock(ClockState *clock, ButtonState buttons[]);
+void readButton(ButtonState *button);
+void readAllButtons(ButtonState buttons[], uint8_t numButtons);
+uint8_t isPressed(ButtonState *button);
+uint8_t anyButtonPressed(ButtonState buttons[], uint8_t numButtons);
+
+
+
+void turnOffLed(uint8_t portMask);
 void showMinutesOrSeconds(uint8_t value);
-void blinkWithLed(ClockState *clock, uint8_t portMask);
 void showHours(uint8_t value);
-void handleUndimmedState(ClockState *clock);
-void handleDimmedState(ClockState *clock);
-void handleSetTimeMode(ClockState *clock, ButtonStates *buttonStates);
-void processUserInput(ClockState *clock, ButtonStates *buttons);
+void handleDisplay(uint8_t idleCounter);
+void handleSetTimeMode(ClockState *clock, ButtonState *buttonStates);
+void processUserInput(ClockState *clock, ButtonState *buttons);
 
 #endif /* CONTEXT_H_ */

@@ -5,23 +5,34 @@ const int HOURS_THRESHOLD = 24;
 const int SECOND_MINUTES_THRESHOLD = 60;
 //auto sleep after 15s
 const int AWOKE_TIME_IN_SECONDS = 15;
-//doubled value for 3 blinks
-const int MAX_BLINK_AMOUNT = 6;
+
+const uint8_t MODE_BITMASK = 0b1111;
+const uint8_t SECONDS_MODE_BITMASK = 0b1000;
+const uint8_t SET_HOUR_BITMASK = 0b100;
+const uint8_t SET_TIME_BITMASK = 0b10;
 
 
-void setupClock(ClockState *clock) {
+void setupClock(ClockState *clock, ButtonState *buttons) {
 	// To-Do: Change in final to Dimmed with Minutes
 	clock->state = DIMMED_SHOW_SECONDS;
-	clock->wakeUpFlag = TRUE;
-	clock->ledsOn = FALSE;
-	clock->buttonPressed = FALSE;
 	
 	clock->hours = 13;
-	clock->minutes = 50;
-	clock->seconds = 50;
-	clock->quarterMs = 0;
-	clock->blinkCounter = 0;
+	clock->minutes = 59;
+	clock->seconds = 49;
+	clock->idleCounter = 0;
 	clock->awokeTimeCounterSeconds = 0;
+	
+	buttons[0].pin = BUTTON1;
+	buttons[0].button_value = 0;
+	buttons[0].button_changeLog = 0;
+
+	buttons[1].pin = BUTTON2;
+	buttons[1].button_value = 0;
+	buttons[1].button_changeLog = 0;
+
+	buttons[2].pin = BUTTON3;
+	buttons[2].button_value = 0; 
+	buttons[2].button_changeLog = 0;
 }
 
 void setupMikroController() {
@@ -44,12 +55,15 @@ void setupMikroController() {
 
 	//Overflow-Counter Interrupt on
 	TIMSK2 |= (1 << TOIE2);
+	
+	//counter0 on without pre scaling
+	TCCR0B |= (1 << CS20);
+	//Timer-Overflow Interrupt on
+	TIMSK0 |= (1 << TOIE0);
+	
 
 	//pull up for Button 1 always on
 	PORTD |= (1 << BUTTON1) | (1 << BUTTON2) | (1 << BUTTON3);
-
-	// trigger button 1 INT0 interrupt recognition on any change
-	MCUCR |= (1 << ISC01);
 
 	//turn off Analog Comparator
 	ACSR |= (1 << ACD);
@@ -57,14 +71,11 @@ void setupMikroController() {
 	//turning off other modules except timer 0 and 2
 	PRR |= (1 <<  PRTWI) |  (1 <<   PRTIM1) | (1 <<  PRSPI)| (1 << PRUSART0)| (1 << PRADC);
 	
-	/*
+	
 	//turn off digital input buffers for analog channels
 	DIDR1 |= (1 << AIN1D)  | (1 <<  AIN0D);
-	*/
+	
 
 	//global interrupts on
 	sei();
-
-	//sleep mode with counter2 still active (Extended Standby)
-	SMCR |= (1 << SM2) | (1 << SM1) | (1 << SM0);
 }
