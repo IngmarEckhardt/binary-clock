@@ -44,10 +44,12 @@ void displayTime(uint8_t portMask) {
 	DDRC |= (portMask);
 }
 
+//define them as input, turn off led
 void turnOffLed(uint8_t portMask) {
 	DDRC &= ~(portMask);
 }
 void handleDisplay(uint8_t idleCounter) {
+	//turn on led only if idle counter has the overflow 1/256 -> 0,4% Output
 	if (idleCounter) {
 		turnOffLed(MINUTES_LED | HOURS_LED);
 		} else {

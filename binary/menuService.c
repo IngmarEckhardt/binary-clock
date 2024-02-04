@@ -24,6 +24,7 @@ void processUserInput(Clock *clock) {
 			clock->state = STANDBY;
 			break;
 		}
+		//go to Set Time, start with hours
 		case BUTTON2:{
 			clock->state |= SET_TIME | SET_HOUR | BUTTON_PRESSED;
 			break;

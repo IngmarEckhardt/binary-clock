@@ -8,7 +8,6 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-//define PINs
 extern const int HOURS_THRESHOLD;
 extern const int SECOND_MINUTES_THRESHOLD;
 //auto sleep after 15s

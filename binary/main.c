@@ -6,8 +6,8 @@ void goToIdle();
 void goToStandby(Clock *clock);
 //we wake up from standby, turn on pull-ups and prepare Idle-Mode and counter 0 with its interrupts
 void wakeUpFromStandby(Clock *clock);
-//every second the time and ports for led are updated from counter2 overflow interrupt
-void incrementTimeAndUpdateLed(Clock *clock);
+//every second the time are updated from counter2 overflow interrupt
+void incrementTime(Clock *clock);
 //we just set the correct value for the ports of the led, but they are driven by Port C3 and Port C4 as ground and dark without these ports correctly set
 void calculateAndSetLedForTime(Clock *clock);
 
@@ -31,25 +31,25 @@ ISR(TIMER2_OVF_vect){
 	//turn off interrupt for counter 0 during routine
 	TIMSK0 &= ~(1 << OCIE0A);
 	
-	incrementTimeAndUpdateLed(&watch);
+	incrementTime(&watch);
 	
 	//all Buttons can wake us up from standby
 	if (watch.state&STANDBY) {
+		//Turn on pull up
 		PORTD |= BUTTON1;
 		readAllButtons(&watch);
 		
 		if (watch.state&BUTTON1) {
 			wakeUpFromStandby(&watch);
 			} else {
+			//turn off pull up if we don't get awake
 			PORTD &= ~(BUTTON1);
 		}
 		} else {
 		//or counting the seconds how long we are awake
 		watch.awokeTimeCounterSeconds++;
 		calculateAndSetLedForTime(&watch);
-		
 	}
-	
 
 	//if we are awake for 15s without interaction we go to sleep
 	if (watch.awokeTimeCounterSeconds >= AWOKE_TIME_IN_SECONDS) {
@@ -67,6 +67,7 @@ ISR(TIMER2_OVF_vect){
 ISR(TIMER0_COMPA_vect){
 	watch.idleCounter++;
 	
+	//its still enough to read a few dozen times per minute, read onlye if idle counter has a overflow to zero
 	if (!watch.idleCounter) {
 		readAllButtons(&watch);
 		processUserInput(&watch);
@@ -76,6 +77,7 @@ ISR(TIMER0_COMPA_vect){
 			handleSetTimeMode(&watch);
 		}
 	}
+	//turn on led only if idle counter has the overflow 1/256 -> 0,4% Output
 	handleDisplay(watch.idleCounter);
 }
 
@@ -83,6 +85,7 @@ void goToIdle() {
 	//sleep mode control bits all zero for idle, just enable sleep
 	SMCR = 1;
 	sleep_mode();
+	//sleep disabled after wake up
 	SMCR = 0;
 }
 
@@ -101,7 +104,7 @@ void goToStandby(Clock *clock) {
 	//turn off pull ups
 	PORTD &= ~(BUTTON1| BUTTON2 | BUTTON3);
 	
-	//sleep mode with counter2 still active (Extended Standby)
+	//sleep mode with counter2 still active (External Standby)
 	SMCR |= (1 << SM2) | (1 << SM1) | (1 << SM0) | (1 << SE);
 	
 	sleep_mode();
@@ -113,20 +116,20 @@ void wakeUpFromStandby(Clock *clock) {
 	
 	clock -> awokeTimeCounterSeconds = 0;
 	
-	// To-Do: Change to Minutes in final version, Button pressed because we get awoke with a button
+	//Button pressed because we get awoke with a button
 	clock -> state = BUTTON_PRESSED;
 	
 	//Turn On Pull-Ups-after Sleep
 	PORTD |= BUTTON1| BUTTON2 | BUTTON3;
 	
 	calculateAndSetLedForTime(clock);
-	//delete counter interrupt
+	//delete counter interrupt flag
 	TIFR0 &= ~(1 << OCF0A);
-	//Overflow-Interrupt for Counter0 on
+	//Interrupt for Counter0 on
 	TIMSK0 |= (1 << OCIE0A);
 }
 
-void incrementTimeAndUpdateLed(Clock *clock) {
+void incrementTime(Clock *clock) {
 	clock -> seconds++;
 
 	if (clock -> seconds >= SECOND_MINUTES_THRESHOLD) {
@@ -144,17 +147,17 @@ void incrementTimeAndUpdateLed(Clock *clock) {
 		}
 	}
 }
+
 void readAllButtons(Clock *clock) {
 	//we cut away button values from old state, and place the button-values (opposite of the port because of pull-ups) from the ports there
 	clock -> state = (clock -> state & ~(BUTTONS)) | (~PIND & BUTTONS);
 }
 
-void calculateAndSetLedForTime(Clock *clock)
-{
+void calculateAndSetLedForTime(Clock *clock) {
 	showHours(clock ->hours);
 	if (clock -> state & SECONDS) {
-		showMinutesOrSeconds(watch.seconds);
+		showMinutesOrSeconds(clock->seconds);
 		} else {
-		showMinutesOrSeconds(watch.minutes);
+		showMinutesOrSeconds(clock->minutes);
 	}
 }
