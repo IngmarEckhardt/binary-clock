@@ -40,10 +40,10 @@ ISR(TIMER2_OVF_vect){
 		
 		if (watch.state&BUTTON1) {
 			wakeUpFromStandby(&watch);
-		} else {
+			} else {
 			PORTD &= ~(BUTTON1);
 		}
-	} else {
+		} else {
 		//or counting the seconds how long we are awake
 		watch.awokeTimeCounterSeconds++;
 		calculateAndSetLedForTime(&watch);
@@ -89,14 +89,14 @@ void goToIdle() {
 void goToStandby(ClockState *clock) {
 	//counter 0 overflow interrupt off
 	TIMSK0 &= ~(1 << OCIE0A);
-		
+	
 	turnOffLed(MINUTES_LED | HOURS_LED);
 	
 	readAllButtons(clock);
 	if (clock->state&BUTTON1) {
-			//counter 0 overflow interrupt on
-			TIMSK0 |= (1 << OCIE0A);
-			return;
+		//counter 0 overflow interrupt on
+		TIMSK0 |= (1 << OCIE0A);
+		return;
 	}
 	//turn off pull ups
 	PORTD &= ~(BUTTON1| BUTTON2 | BUTTON3);
@@ -150,7 +150,7 @@ void readAllButtons(ClockState *clock) {
 }
 
 void calculateAndSetLedForTime(ClockState *clock)
-{		
+{
 	showHours(clock ->hours);
 	if (clock -> state & SECONDS) {
 		showMinutesOrSeconds(watch.seconds);

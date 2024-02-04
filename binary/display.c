@@ -50,7 +50,7 @@ void turnOffLed(uint8_t portMask) {
 void handleDisplay(uint8_t idleCounter) {
 	if (idleCounter) {
 		turnOffLed(MINUTES_LED | HOURS_LED);
-	} else {
+		} else {
 		displayTime(MINUTES_LED | HOURS_LED);
 	}
 }

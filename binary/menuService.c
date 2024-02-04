@@ -5,7 +5,7 @@ void processUserInput(ClockState *clock) {
 	if (!(clock->state & BUTTONS)) {
 		clock -> state = clock -> state & ~(BUTTON_PRESSED);
 		return;
-	} else {
+		} else {
 		clock->awokeTimeCounterSeconds = 0;
 	}
 	
@@ -21,19 +21,17 @@ void processUserInput(ClockState *clock) {
 	//we cut away from the state-value what is not a button
 	switch (clock -> state&BUTTONS) {
 		case BUTTON1: {
-				clock->state = STANDBY;
-				break;
-			}
+			clock->state = STANDBY;
+			break;
+		}
 		case BUTTON2:{
-					clock->state |= SET_TIME | SET_HOUR | BUTTON_PRESSED;
-					break;
-			}	
-		//switch between minutes and seconds	
+			clock->state |= SET_TIME | SET_HOUR | BUTTON_PRESSED;
+			break;
+		}
+		//switch between minutes and seconds
 		case BUTTON3: {
-				{
-					clock->state ^= SECONDS | BUTTON_PRESSED;
-					break;
-				}
+			clock->state ^= SECONDS | BUTTON_PRESSED;
+			break;
 		}
 	}
 }
