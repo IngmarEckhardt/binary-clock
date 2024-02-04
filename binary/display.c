@@ -39,6 +39,7 @@ void showHours(uint8_t value) {
 	else {PORTB &= ~(1 << PB2);}
 }
 
+//define the ports as output, drives them as ground
 void displayTime(uint8_t portMask) {
 	DDRC |= (portMask);
 }

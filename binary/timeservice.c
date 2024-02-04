@@ -11,7 +11,7 @@ void setTime(ClockState *clock, volatile uint8_t *timeValue, uint8_t threshold) 
 	if (clock ->state & BUTTON_PRESSED) {
 		return;
 	}
-	
+	//we cut away from the state-value what is not a button
 	switch (clock -> state&BUTTONS) {
 		case BUTTON1: {
 			if ((*timeValue) > 0) {

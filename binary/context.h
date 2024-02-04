@@ -1,22 +1,21 @@
 #ifndef CONTEXT_H_
 #define CONTEXT_H_
 
+#define MINUTES_LED		0b1000
+#define HOURS_LED		0b10000
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
 //define PINs
-#define MINUTES_LED		0b1000
-#define HOURS_LED		0b10000
-//make it more readable
-#define TRUE 1
-#define FALSE 0
-
 extern const int HOURS_THRESHOLD;
 extern const int SECOND_MINUTES_THRESHOLD;
 //auto sleep after 15s
 extern const int AWOKE_TIME_IN_SECONDS;
 
+
+//bits of the state-byte in ClockState
 enum ClockStates {
 	SET_TIME		= 0b00000001,
 	SET_HOUR		= 0b00000010,
@@ -36,9 +35,8 @@ typedef struct {
 	volatile uint8_t minutes;
 	volatile uint8_t hours;
 	volatile uint8_t awokeTimeCounterSeconds;
-
+	
 } ClockState;
-
 
 void setupMikroController();
 void setupClock(ClockState *clock);

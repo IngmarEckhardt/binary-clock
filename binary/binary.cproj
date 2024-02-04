@@ -136,9 +136,6 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="buttons.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="context.h">
       <SubType>compile</SubType>
     </Compile>

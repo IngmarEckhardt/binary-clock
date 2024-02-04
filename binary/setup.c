@@ -7,13 +7,13 @@ const int AWOKE_TIME_IN_SECONDS = 15;
 
 void setupClock(ClockState *clock) {
 	clock->hours = 13;
-	clock->minutes = 59;
-	clock->seconds = 49;
-	clock->idleCounter = 0;
+	clock->minutes = 50;
+	clock->seconds = 00;
 	clock->awokeTimeCounterSeconds = 0;
 }
 
 void setupMikroController() {
+	//I/O
 	//set Data-Direction Output for LED
 	DDRB |= (1 << DDB0) | (1 << DDB1) | (1 << DDB2);
 	DDRC |= (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3) | (1 << DDC4) | (1 << DDC5);
@@ -24,9 +24,10 @@ void setupMikroController() {
 	DDRD &= ~(BUTTON2);
 	DDRD &= ~(BUTTON3);
 
-	//pull up for Button 1 always on
+	//pull up for Buttons on
 	PORTD |= BUTTON1 | BUTTON2 | BUTTON3;
 
+	//Energy saving
 	//turn off Analog Comparator
 	ACSR |= (1 << ACD);
 
@@ -36,24 +37,27 @@ void setupMikroController() {
 	//turn off digital input buffers for analog channels
 	DIDR1 |= (1 << AIN1D)  | (1 <<  AIN0D);
 	
+	//Counter
 	//Using asynchronous timer with low frequency crystal
 	ASSR |= (1 << AS2);
 
-	//pre scaler 128 (256x128 = 32768))
+	//Prescaler 128 (256x128 = 32768))
 	TCCR2B |= (1 << CS22) | (1 << CS20);
 
-	//Overflow-Counter Interrupt on
+	//Overflow-Counter 2 Interrupt on -> overflow every 1sec precisly
 	TIMSK2 |= (1 << TOIE2);
 
-	//counter0 on without pre scaling
+	//counter0 with Prescaler 8
 	TCCR0B |= (1 << CS21);
-	//Timer-Overflow Interrupt on
+	
+	//OutputcompareMatch Interrupt for counter 0 on
 	TIMSK0 |= (1 << OCIE0A);
+	
 	//CTC Mode
 	TCCR0A |= (1 << WGM01);
 	
-	//Adjust value to flickering tolerance, higher more flickering, but more idle, less power consumation
-	OCR0A = 110;
+	//Adjust value between ca. 80-120 to flickering tolerance, higher more flickering, but more idle, less power consummation, all calculations with 8Mhz default clock of the ATMega48A
+	OCR0A = 115;
 	
 	//global interrupts on
 	sei();
