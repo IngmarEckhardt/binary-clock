@@ -3,15 +3,15 @@
 //we send the controller to idle until counter0 interrupt occur
 void goToIdle();
 //we turn off pull up resistor and counter0 with its interrupts
-void goToStandby(ClockState *clock);
+void goToStandby(Clock *clock);
 //we wake up from standby, turn on pull-ups and prepare Idle-Mode and counter 0 with its interrupts
-void wakeUpFromStandby(ClockState *clock);
+void wakeUpFromStandby(Clock *clock);
 //every second the time and ports for led are updated from counter2 overflow interrupt
-void incrementTimeAndUpdateLed(ClockState *clock);
+void incrementTimeAndUpdateLed(Clock *clock);
 //we just set the correct value for the ports of the led, but they are driven by Port C3 and Port C4 as ground and dark without these ports correctly set
-void calculateAndSetLedForTime(ClockState *clock);
+void calculateAndSetLedForTime(Clock *clock);
 
-ClockState watch = {0};
+Clock watch = {0};
 
 int main(void) {
 	
@@ -86,7 +86,7 @@ void goToIdle() {
 	SMCR = 0;
 }
 
-void goToStandby(ClockState *clock) {
+void goToStandby(Clock *clock) {
 	//counter 0 overflow interrupt off
 	TIMSK0 &= ~(1 << OCIE0A);
 	
@@ -107,7 +107,7 @@ void goToStandby(ClockState *clock) {
 	sleep_mode();
 }
 
-void wakeUpFromStandby(ClockState *clock) {
+void wakeUpFromStandby(Clock *clock) {
 	//Set Sleep-Mode To Idle and Sleep disabled
 	SMCR = 0;
 	
@@ -126,7 +126,7 @@ void wakeUpFromStandby(ClockState *clock) {
 	TIMSK0 |= (1 << OCIE0A);
 }
 
-void incrementTimeAndUpdateLed(ClockState *clock) {
+void incrementTimeAndUpdateLed(Clock *clock) {
 	clock -> seconds++;
 
 	if (clock -> seconds >= SECOND_MINUTES_THRESHOLD) {
@@ -144,12 +144,12 @@ void incrementTimeAndUpdateLed(ClockState *clock) {
 		}
 	}
 }
-void readAllButtons(ClockState *clock) {
+void readAllButtons(Clock *clock) {
 	//we cut away button values from old state, and place the button-values (opposite of the port because of pull-ups) from the ports there
 	clock -> state = (clock -> state & ~(BUTTONS)) | (~PIND & BUTTONS);
 }
 
-void calculateAndSetLedForTime(ClockState *clock)
+void calculateAndSetLedForTime(Clock *clock)
 {
 	showHours(clock ->hours);
 	if (clock -> state & SECONDS) {

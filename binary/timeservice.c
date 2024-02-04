@@ -1,6 +1,6 @@
 #include "context.h"
 
-void setTime(ClockState *clock, volatile uint8_t *timeValue, uint8_t threshold) {
+void setTime(Clock *clock, volatile uint8_t *timeValue, uint8_t threshold) {
 
 	if (!(clock->state & BUTTONS)) {
 		clock -> state = clock -> state & ~(BUTTON_PRESSED);
@@ -43,7 +43,7 @@ void setTime(ClockState *clock, volatile uint8_t *timeValue, uint8_t threshold) 
 }
 
 
-void handleSetTimeMode(ClockState *clock) {
+void handleSetTimeMode(Clock *clock) {
 
 	if (clock->state & SET_HOUR) {
 		setTime(clock, &(clock->hours), HOURS_THRESHOLD);

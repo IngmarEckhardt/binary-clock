@@ -1,6 +1,6 @@
 #include "context.h"
 
-void processUserInput(ClockState *clock) {
+void processUserInput(Clock *clock) {
 	
 	if (!(clock->state & BUTTONS)) {
 		clock -> state = clock -> state & ~(BUTTON_PRESSED);

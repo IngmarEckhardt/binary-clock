@@ -36,16 +36,16 @@ typedef struct {
 	volatile uint8_t hours;
 	volatile uint8_t awokeTimeCounterSeconds;
 	
-} ClockState;
+} Clock;
 
 void setupMikroController();
-void setupClock(ClockState *clock);
-void readAllButtons(ClockState *clock);
+void setupClock(Clock *clock);
+void readAllButtons(Clock *clock);
 void turnOffLed(uint8_t portMask);
 void showMinutesOrSeconds(uint8_t value);
 void showHours(uint8_t value);
 void handleDisplay(uint8_t idleCounter);
-void handleSetTimeMode(ClockState *clock);
-void processUserInput(ClockState *clock);
+void handleSetTimeMode(Clock *clock);
+void processUserInput(Clock *clock);
 
 #endif /* CONTEXT_H_ */
