@@ -1,24 +1,22 @@
 #include "context.h"
 
-
-//we send the controller to idle until counter0 overflow
+//we send the controller to idle until counter0 interrupt occur
 void goToIdle();
 //we turn off pull up resistor and counter0 with its interrupts
-void goToStandby(ClockState *clock, ButtonState *button);
+void goToStandby(ClockState *clock);
 //we wake up from standby, turn on pull-ups and prepare Idle-Mode and counter 0 with its interrupts
 void wakeUpFromStandby(ClockState *clock);
 //every second the time and ports for led are updated from counter2 overflow interrupt
 void incrementTimeAndUpdateLed(ClockState *clock);
 
 ClockState watch = {0};
-ButtonState buttons[3];
 
 int main(void) {
 	setupMikroController();
-	setupClock(&watch, buttons);
+	setupClock(&watch);
 	while (1) {
 		if (watch.state & STANDBY) {
-			goToStandby(&watch, &buttons[0]);
+			goToStandby(&watch);
 			} else {
 			goToIdle();
 		}
@@ -27,48 +25,53 @@ int main(void) {
 
 ISR(TIMER2_OVF_vect){
 	//turn off interrupt for counter 0 during routine
-	TIMSK0 &= ~(1 << TOIE0);
+	TIMSK0 &= ~(1 << OCIE0A);
 	
 	incrementTimeAndUpdateLed(&watch);
 	
 	if (watch.state&STANDBY) {
 		
-		readButton(&buttons[0]);
+		readAllButtons(&watch);
 		
-		if (buttons[0].button_changeLog&TRUE) {
+		if (watch.state&BUTTON1) {
 			wakeUpFromStandby(&watch);
 		}
 	} else {
 		//or counting the seconds how long we are awake
 		watch.awokeTimeCounterSeconds++;
 		showHours(watch.hours);
-		if (watch.state & SECONDS_MODE_BITMASK) {
+		if (watch.state & SECONDS) {
 			showMinutesOrSeconds(watch.seconds);
 			} else {
 			showMinutesOrSeconds(watch.minutes);
 		}
 	}
+	
 
 	//if we are awake for 15s without interaction we go to sleep
 	if (watch.awokeTimeCounterSeconds >= AWOKE_TIME_IN_SECONDS) {
-		watch.state = DIMMED | STANDBY;
+		watch.state = STANDBY;
 	}
+	
 	//turn on interrupt for counter 0 after routine
 	if (!(watch.state&STANDBY)) {
-		TIFR0 &= ~(1<<TOV0);
-		TIMSK0 |= (1 << TOIE0);
+		TIFR0 &= ~(1<<OCIE0A);
+		TIMSK0 |= (1 << OCIE0A);
 	}
 }
 
 
-ISR(TIMER0_OVF_vect){
+ISR(TIMER0_COMPA_vect){
 	watch.idleCounter++;
 	
-	if (!watch.idleCounter%32) {
-		processUserInput(&watch, buttons);
-		if (watch.state&SET_TIME_BITMASK) {
-			watch.state = watch.state & ~(SECONDS_MODE_BITMASK) & ~(DIMMED);
-			handleSetTimeMode(&watch, buttons);
+	if (!watch.idleCounter) {
+		processUserInput(&watch);
+		if (watch.state&SET_TIME) {
+			watch.state &= ~(SECONDS);
+			handleSetTimeMode(&watch);
+		}
+		else if (watch.state&STANDBY) {
+			goToStandby(&watch);
 		}
 	}
 	handleDisplay(watch.idleCounter);
@@ -82,20 +85,24 @@ void goToIdle() {
 }
 
 
-void goToStandby(ClockState *clock, ButtonState *button) {
+void goToStandby(ClockState *clock) {
 	//counter 0 overflow interrupt off
-	TIMSK0 &= ~(1 << TOIE0);
-	
-	if (isPressed(button)) {
-		//counter 0 overflow interrupt on
-		TIMSK0 |= (1 << TOIE0);
-		return;
-	}
+	TIMSK0 &= ~(1 << OCIE0A);
 		
 	turnOffLed(MINUTES_LED | HOURS_LED);
 	
+	readAllButtons(clock);
+	if (clock->state&BUTTON1) {
+			//counter 0 overflow interrupt on
+			TIMSK0 |= (1 << OCIE0A);
+			return;
+	}
+	//turn off pull ups
+	PORTD &= ~(BUTTON2 | BUTTON3);
+	
 	//sleep mode with counter2 still active (Extended Standby)
 	SMCR |= (1 << SM2) | (1 << SM1) | (1 << SM0) | (1 << SE);
+	
 	sleep_mode();
 }
 
@@ -104,11 +111,17 @@ void wakeUpFromStandby(ClockState *clock) {
 	SMCR = 0;
 	
 	clock -> awokeTimeCounterSeconds = 0;
-	clock -> state = DIMMED_SHOW_SECONDS | BUTTON_PRESSED;
 	
-	TIFR0 &= ~(1<<TOV0);
+	// To-Do: Change to Minutes in final version, Button pressed because we get awoke with a button
+	clock -> state = BUTTON_PRESSED;
+	
+	//Turn On Pull-Ups-after Sleep
+	PORTD |= BUTTON2 | BUTTON3;
+	
+	//delete counter interrupt
+	TIFR0 &= ~(1 << OCF0A);
 	//Overflow-Interrupt for Counter0 on
-	TIMSK0 |= (1 << TOIE2);
+	TIMSK0 |= (1 << OCIE0A);
 }
 
 void incrementTimeAndUpdateLed(ClockState *clock) {
@@ -128,4 +141,8 @@ void incrementTimeAndUpdateLed(ClockState *clock) {
 			}
 		}
 	}
+}
+void readAllButtons(ClockState *clock) {
+	
+	clock -> state = (clock -> state & ~(BUTTONS)) | (~PIND & BUTTONS);
 }
