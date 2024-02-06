@@ -1,8 +1,8 @@
 #include "context.h"
 /*
 ports for LED
-minutes LED (start with highest bit) PC0 PC1 PC2 PC5 PD0 PD1
-hours LED PB2 PB1 PB0 PD6 PD5
+minutes LED (start with highest bit):	PC0 PC1 PC2 PC5 PD0 PD1
+hours LED:								PB2 PB1 PB0 PD6 PD5
 */
 
 //set the ports to the LED according the bit-Values of the parameter
@@ -12,6 +12,7 @@ void showMinutesOrSeconds(uint8_t value) {
 	
 }
 
+//set the ports to the LED according the bit-Values of the parameter
 void showHours(uint8_t value) {
 	PORTD = (PORTD & 0b10011111) | (value << 5);
 	PORTB = (PORTB & 0b11111000) | (value >> 2);
@@ -26,6 +27,7 @@ void displayTime(uint8_t portMask) {
 void turnOffLed(uint8_t portMask) {
 	DDRC &= ~(portMask);
 }
+
 void handleDisplay(uint8_t idleCounter) {
 	//turn on led only if idle counter has the overflow 1/256 -> 0,4% Output
 	if (idleCounter) {

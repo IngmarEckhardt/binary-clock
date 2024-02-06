@@ -3,11 +3,14 @@
 void setTime(Clock *clock, volatile uint8_t *timeValue, uint8_t threshold) {
 
 	if (!(clock->state & BUTTONS)) {
+		//if no button is pressed we can clear the bit if necessary and return
 		clock -> state &= ~(BUTTON_PRESSED);
 		return;
 		} else {
+		//or reset the counter if a user interaction is detected	
 		clock->awokeTimeCounterSeconds = 0;
 	}
+	//if still a button is pressed we return
 	if (clock ->state & BUTTON_PRESSED) {
 		return;
 	}
@@ -43,7 +46,7 @@ void setTime(Clock *clock, volatile uint8_t *timeValue, uint8_t threshold) {
 }
 
 void handleSetTimeMode(Clock *clock) {
-
+	
 	if (clock->state & SET_HOUR) {
 		setTime(clock, &(clock->hours), HOURS_THRESHOLD);
 		} else {

@@ -35,9 +35,8 @@ typedef struct {
 	
 } Clock;
 
-void setupMikroController();
+void setupMikrocontroller();
 void setupClock(Clock *clock);
-void readAllButtons(Clock *clock);
 void turnOffLed(uint8_t portMask);
 void showMinutesOrSeconds(uint8_t value);
 void showHours(uint8_t value);

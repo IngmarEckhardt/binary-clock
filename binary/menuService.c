@@ -3,9 +3,11 @@
 void processUserInput(Clock *clock) {
 	
 	if (!(clock->state & BUTTONS)) {
+		//if no button is pressed we can clear the bit if necessary and return
 		clock -> state &= ~(BUTTON_PRESSED);
 		return;
 		} else {
+		//or reset the counter if a user interaction is detected	
 		clock->awokeTimeCounterSeconds = 0;
 	}
 	

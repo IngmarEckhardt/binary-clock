@@ -17,7 +17,7 @@ Clock watch = {0};
 ** If awoke counter0 output-compare interrupt wake us up from idle, increase the idleCounter value and process user-input 
 ** and turn the led on when the idleCounter has the overflow to zero. Between these interrupt-events the CPU is in external standby or idle sleep mode.
 **
-** adjust counter 0 outputcompare-match in setup to your flickering tolerance and set CPU Frequency to 1Mhz
+** adjust counter 0 output compare-match in setup to your flickering tolerance and set CPU Frequency to 1Mhz
 ** 1Mhz / (8 Prescaler * 15 OutputcompareMatch * 256 idleCounterOverflow) = 32hz for reading user input and led frequency;
 ** 1Mhz / (8 Prescaler * 10 OutputcompareMatch * 256 idleCounterOverflow) = 49hz for reading user input and led frequency;
 */
@@ -57,7 +57,7 @@ ISR(TIMER2_OVF_vect){
 		watch.awokeTimeCounterSeconds++;
 		calculateAndSetLedForTime(&watch);
 		
-		//if we are awake for 15s without interaction we go to sleep
+		//if we are too long awake without interaction we go to sleep
 		if (watch.awokeTimeCounterSeconds >= SLEEP_TIMER_SECONDS) {
 			watch.state = STANDBY;
 		}
@@ -66,10 +66,10 @@ ISR(TIMER2_OVF_vect){
 }
 
 ISR(TIMER0_COMPA_vect){
-	
+	//int8_t overflow with 32-49hz
 	watch.idleCounter++;
 	
-	//its still enough to read a few dozen times per minute, read onlye if idle counter has a overflow to zero
+	//its still enough to read a few dozen times per second, read only if idle counter has a overflow to zero
 	if (!watch.idleCounter) {
 		readAllButtons(&watch);
 		processUserInput(&watch);
@@ -78,8 +78,8 @@ ISR(TIMER0_COMPA_vect){
 			goToStandby(&watch);
 			return;
 		}
-		
 		if (watch.state&SET_TIME) {
+			//in Set_Time Mode we only show minutes
 			watch.state &= ~(SECONDS);
 			handleSetTimeMode(&watch);
 		}
@@ -89,7 +89,7 @@ ISR(TIMER0_COMPA_vect){
 }
 
 void goToStandby(Clock *clock) {
-	//counter 0 overflow interrupt off
+	//counter 0 interrupt off
 	TIMSK0 &= ~(1 << OCIE0A);
 	
 	turnOffLed(MINUTES_LED | HOURS_LED);
@@ -97,7 +97,6 @@ void goToStandby(Clock *clock) {
 	readAllButtons(clock);
 	//return if Button1 is still pressed
 	if (clock->state&BUTTON1) {
-		//counter 0 overflow interrupt on
 		clearCounter0InterruptFlagAndTurnOnInterrupt();
 		return;
 	}
@@ -154,6 +153,7 @@ void calculateAndSetLedForTime(Clock *clock) {
 		showMinutesOrSeconds(clock->minutes);
 	}
 }
+
 void clearCounter0InterruptFlagAndTurnOnInterrupt() {
 	TIFR0 &= ~(1<<OCIE0A);
 	TIMSK0 |= (1 << OCIE0A);
