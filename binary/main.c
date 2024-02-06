@@ -50,10 +50,8 @@ ISR(TIMER2_OVF_vect){
 		//if we are awake for 15s without interaction we go to sleep
 		if (watch.awokeTimeCounterSeconds >= AWOKE_TIME_IN_SECONDS) {
 			watch.state = STANDBY;
-			return;
 		}
 		clearCounter0InterruptFlagAndTurnOnInterrupt();
-		return; 
 	}	
 }
 
