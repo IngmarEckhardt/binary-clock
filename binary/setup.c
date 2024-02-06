@@ -3,7 +3,7 @@
 const int HOURS_THRESHOLD = 24;
 const int SECOND_MINUTES_THRESHOLD = 60;
 //auto sleep after 12s
-const int AWOKE_TIME_IN_SECONDS = 12;
+const int SLEEP_TIMER_SECONDS = 12;
 
 void setupClock(Clock *clock) {
 	clock->hours = 13;

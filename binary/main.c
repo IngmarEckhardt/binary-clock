@@ -12,6 +12,15 @@ void clearCounter0InterruptFlagAndTurnOnInterrupt();
 
 Clock watch = {0};
 
+/* 
+** Every second timer2 overflow interrupt increase seconds value, set the LED for the time or wake us up if user press button1. 
+** If awoke counter0 output-compare interrupt wake us up from idle, increase the idleCounter value and process user-input 
+** and turn the led on when the idleCounter has the overflow to zero. Between these interrupt-events the CPU is in external standby or idle sleep mode.
+**
+** adjust counter 0 outputcompare-match in setup to your flickering tolerance
+** 8Mhz / (8 Prescaler * 120 OutputcompareMatch * 256 idleCounterOverflow) = 32hz for reading user input and led frequency;
+** 8Mhz / (8 Prescaler * 80 OutputcompareMatch * 256 idleCounterOverflow) = 49hz for reading user input and led frequency;
+*/
 int main(void) {
 	
 	setupMikroController();
@@ -48,7 +57,7 @@ ISR(TIMER2_OVF_vect){
 		calculateAndSetLedForTime(&watch);
 		
 		//if we are awake for 15s without interaction we go to sleep
-		if (watch.awokeTimeCounterSeconds >= AWOKE_TIME_IN_SECONDS) {
+		if (watch.awokeTimeCounterSeconds >= SLEEP_TIMER_SECONDS) {
 			watch.state = STANDBY;
 		}
 		clearCounter0InterruptFlagAndTurnOnInterrupt();

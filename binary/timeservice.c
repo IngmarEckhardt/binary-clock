@@ -3,7 +3,7 @@
 void setTime(Clock *clock, volatile uint8_t *timeValue, uint8_t threshold) {
 
 	if (!(clock->state & BUTTONS)) {
-		clock -> state = clock -> state & ~(BUTTON_PRESSED);
+		clock -> state &= ~(BUTTON_PRESSED);
 		return;
 		} else {
 		clock->awokeTimeCounterSeconds = 0;
