@@ -1,7 +1,7 @@
 #include "context.h"
 
 const int HOURS_THRESHOLD = 24;
-const int SECOND_MINUTES_THRESHOLD = 60;
+const int SECONDS_MINUTES_THRESHOLD = 60;
 //auto sleep after 12s
 const int SLEEP_TIMER_SECONDS = 12;
 

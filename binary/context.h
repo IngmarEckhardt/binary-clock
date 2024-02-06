@@ -9,7 +9,7 @@
 #include <avr/sleep.h>
 
 extern const int HOURS_THRESHOLD;
-extern const int SECOND_MINUTES_THRESHOLD;
+extern const int SECONDS_MINUTES_THRESHOLD;
 extern const int SLEEP_TIMER_SECONDS;
 
 //bits of the state-byte in ClockState

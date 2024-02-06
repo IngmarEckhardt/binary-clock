@@ -8,6 +8,7 @@ void wakeUpFromStandby(Clock *clock);
 void incrementTime(Clock *clock);
 //we just set the correct value for the ports of the led, but they are driven by Port C3 and Port C4 as ground and dark without these ports correctly set
 void calculateAndSetLedForTime(Clock *clock);
+void readAllButtons(Clock *clock);
 void clearCounter0InterruptFlagAndTurnOnInterrupt();
 
 Clock watch = {0};
@@ -23,7 +24,7 @@ Clock watch = {0};
 */
 int main(void) {
 	
-	setupMikroController();
+	setupMikrocontroller();
 	setupClock(&watch);
 	
 	while (1) {
