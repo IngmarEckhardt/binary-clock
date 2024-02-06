@@ -17,9 +17,9 @@ Clock watch = {0};
 ** If awoke counter0 output-compare interrupt wake us up from idle, increase the idleCounter value and process user-input 
 ** and turn the led on when the idleCounter has the overflow to zero. Between these interrupt-events the CPU is in external standby or idle sleep mode.
 **
-** adjust counter 0 outputcompare-match in setup to your flickering tolerance
-** 8Mhz / (64 Prescaler * 15 OutputcompareMatch * 256 idleCounterOverflow) = 32hz for reading user input and led frequency;
-** 8Mhz / (64 Prescaler * 10 OutputcompareMatch * 256 idleCounterOverflow) = 49hz for reading user input and led frequency;
+** adjust counter 0 outputcompare-match in setup to your flickering tolerance and set CPU Frequency to 1Mhz
+** 1Mhz / (64 Prescaler * 15 OutputcompareMatch * 256 idleCounterOverflow) = 32hz for reading user input and led frequency;
+** 1Mhz / (64 Prescaler * 10 OutputcompareMatch * 256 idleCounterOverflow) = 49hz for reading user input and led frequency;
 */
 int main(void) {
 	

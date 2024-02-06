@@ -47,8 +47,8 @@ void setupMikroController() {
 	//Overflow-Counter 2 Interrupt on -> overflow every 1sec precisly
 	TIMSK2 |= (1 << TOIE2);
 
-	//counter0 with Prescaler 64
-	TCCR0B |= (1 << CS21) | (1 << CS20);
+	//counter0 with Prescaler 8
+	TCCR0B |= (1 << CS21);
 	
 	//OutputcompareMatch Interrupt for counter 0 on
 	TIMSK0 |= (1 << OCIE0A);
@@ -56,7 +56,7 @@ void setupMikroController() {
 	//CTC Mode
 	TCCR0A |= (1 << WGM01);
 	
-	//Adjust value between ca. 10-15 to flickering tolerance, higher more flickering, but more idle, less power consummation, all calculations with 8Mhz default clock of the ATMega48A
+	//Adjust value between ca. 10-15 to flickering tolerance, higher more flickering, but more idle, less power consummation, all calculations with 1Mhz default clock of the ATMega48A
 	OCR0A = 15;
 	
 	//global interrupts on
