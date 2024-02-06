@@ -18,6 +18,7 @@ void processUserInput(Clock *clock) {
 	if (clock -> state&SET_TIME) {
 		return;
 	}
+	
 	//we cut away from the state-value what is not a button
 	switch (clock -> state&BUTTONS) {
 		case BUTTON1: {

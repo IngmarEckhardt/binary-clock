@@ -2,13 +2,13 @@
 
 const int HOURS_THRESHOLD = 24;
 const int SECOND_MINUTES_THRESHOLD = 60;
-//auto sleep after 15s
-const int AWOKE_TIME_IN_SECONDS = 15;
+//auto sleep after 12s
+const int AWOKE_TIME_IN_SECONDS = 12;
 
 void setupClock(Clock *clock) {
 	clock->hours = 13;
 	clock->minutes = 50;
-	clock->seconds = 00;
+	clock->seconds = 12;
 	clock->awokeTimeCounterSeconds = 0;
 }
 
@@ -57,7 +57,7 @@ void setupMikroController() {
 	TCCR0A |= (1 << WGM01);
 	
 	//Adjust value between ca. 80-120 to flickering tolerance, higher more flickering, but more idle, less power consummation, all calculations with 8Mhz default clock of the ATMega48A
-	OCR0A = 115;
+	OCR0A = 120;
 	
 	//global interrupts on
 	sei();

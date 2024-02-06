@@ -2,41 +2,14 @@
 
 //set the ports to the LED according the bit-Values of the parameter
 void showMinutesOrSeconds(uint8_t value) {
-	if ((value >> 0) & 0x01) {PORTD |= (1 << PD1);}
-	else {PORTD &= ~(1 << PD1);}
-	
-	if ((value >> 1) & 0x01) {PORTD |= (1 << PD0);}
-	else {PORTD &= ~(1 << PD0);}
-	
-	if ((value >> 2) & 0x01) {PORTC |= (1 << PC5);}
-	else {PORTC &= ~(1 << PC5);}
-	
-	if ((value >> 3) & 0x01) {PORTC |= (1 << PC2);}
-	else {PORTC &= ~(1 << PC2);}
-	
-	if ((value >> 4) & 0x01) {PORTC |= (1 << PC1);}
-	else {PORTC &= ~(1 << PC1);}
-	
-	if ((value >> 5) & 0x01) {PORTC |= (1 << PC0);}
-	else {PORTC &= ~(1 << PC0);}
+	PORTD = (PORTD & 0b11111100) | ((value & 0b01) << 1) | ((value & 0b10) >> 1);
+	PORTC = (PORTC & 0b11011000) | ((value & 0b100000) >> 5) | ((value & 0b10000) >> 3) | ((value & 0b1000) >> 1) | ((value & 0b100) << 3);
 	
 }
 
 void showHours(uint8_t value) {
-	if ((value >> 0) & 0x01) {PORTD |= (1 << PD5);}
-	else {PORTD &= ~(1 << PD5);}
-	
-	if ((value >> 1) & 0x01) {PORTD |= (1 << PD6);}
-	else {PORTD &= ~(1 << PD6);}
-	
-	if ((value >> 2) & 0x01) {PORTB |= (1 << PB0);}
-	else {PORTB &= ~(1 << PB0);}
-	
-	if ((value >> 3) & 0x01) {PORTB |= (1 << PB1);}
-	else {PORTB &= ~(1 << PB1);}
-	
-	if ((value >> 4) & 0x01) {PORTB |= (1 << PB2);}
-	else {PORTB &= ~(1 << PB2);}
+	PORTD = (PORTD & 0b10011111) | (value << 5);
+	PORTB = (PORTB & 0b11111000) | (value >> 2);
 }
 
 //define the ports as output, drives them as ground

@@ -42,7 +42,6 @@ void setTime(Clock *clock, volatile uint8_t *timeValue, uint8_t threshold) {
 	}
 }
 
-
 void handleSetTimeMode(Clock *clock) {
 
 	if (clock->state & SET_HOUR) {
@@ -50,5 +49,4 @@ void handleSetTimeMode(Clock *clock) {
 		} else {
 		setTime(clock, &(clock->minutes), SECOND_MINUTES_THRESHOLD);
 	}
-	
 }

@@ -10,9 +10,8 @@
 
 extern const int HOURS_THRESHOLD;
 extern const int SECOND_MINUTES_THRESHOLD;
-//auto sleep after 15s
+//auto sleep after 12s
 extern const int AWOKE_TIME_IN_SECONDS;
-
 
 //bits of the state-byte in ClockState
 enum ClockStates {
