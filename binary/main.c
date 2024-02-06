@@ -39,7 +39,7 @@ ISR(TIMER2_OVF_vect){
 	
 	incrementTime(&watch);
 	
-	//all Buttons can wake us up from standby
+	//Button1 can wake us up from standby
 	if (watch.state&STANDBY) {
 		
 		readAllButtons(&watch);
@@ -125,11 +125,11 @@ void wakeUpFromStandby(Clock *clock) {
 void incrementTime(Clock *clock) {
 	clock -> seconds++;
 
-	if (clock -> seconds >= SECOND_MINUTES_THRESHOLD) {
+	if (clock -> seconds >= SECONDS_MINUTES_THRESHOLD) {
 		clock -> seconds = 0;
 		clock -> minutes++;
 		
-		if (clock -> minutes >= SECOND_MINUTES_THRESHOLD) {
+		if (clock -> minutes >= SECONDS_MINUTES_THRESHOLD) {
 			clock -> minutes = 0;
 			clock -> hours++;
 
