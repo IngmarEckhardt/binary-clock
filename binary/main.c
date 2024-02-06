@@ -47,9 +47,10 @@ ISR(TIMER2_OVF_vect){
 		if (watch.state&BUTTON1) {
 			watch.state &= ~STANDBY;
 			wakeUpFromStandby(&watch);
+		} else {
+			//turn off pull up if we stay in stand-by
+			PORTD &= ~(BUTTON1);	
 		}
-		//turn off pull up if we stay in stand-by
-		PORTD &= ~(BUTTON1);
 	} 
 	else {
 		//or counting the seconds how long we are awake
@@ -97,7 +98,7 @@ void goToStandby(Clock *clock) {
 	//return if Button1 is still pressed
 	if (clock->state&BUTTON1) {
 		//counter 0 overflow interrupt on
-		TIMSK0 |= (1 << OCIE0A);
+		clearCounter0InterruptFlagAndTurnOnInterrupt();
 		return;
 	}
 	//turn off pull ups
@@ -129,7 +130,6 @@ void incrementTime(Clock *clock) {
 		clock -> seconds = 0;
 		clock -> minutes++;
 		
-		
 		if (clock -> minutes >= SECOND_MINUTES_THRESHOLD) {
 			clock -> minutes = 0;
 			clock -> hours++;
@@ -154,8 +154,7 @@ void calculateAndSetLedForTime(Clock *clock) {
 		showMinutesOrSeconds(clock->minutes);
 	}
 }
-void clearCounter0InterruptFlagAndTurnOnInterrupt()
-{
+void clearCounter0InterruptFlagAndTurnOnInterrupt() {
 	TIFR0 &= ~(1<<OCIE0A);
 	TIMSK0 |= (1 << OCIE0A);
 }
