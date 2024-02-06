@@ -1,4 +1,9 @@
 #include "context.h"
+/*
+ports for LED
+minutes LED (start with highest bit) PC0 PC1 PC2 PC5 PD0 PD1
+hours LED PB2 PB1 PB0 PD6 PD5
+*/
 
 //set the ports to the LED according the bit-Values of the parameter
 void showMinutesOrSeconds(uint8_t value) {
@@ -12,7 +17,7 @@ void showHours(uint8_t value) {
 	PORTB = (PORTB & 0b11111000) | (value >> 2);
 }
 
-//define the ports as output, drives them as ground
+//define the ports as output, drives them as ground for led
 void displayTime(uint8_t portMask) {
 	DDRC |= (portMask);
 }
